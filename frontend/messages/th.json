@@ -1,0 +1,21 @@
+{
+  "Navbar": {
+    "title": "HICM Assessment Tool",
+    "staffButton": "สำหรับเจ้าหน้าที่"
+  },
+  "Home": {
+    "welcomeTitle": "ยินดีต้อนรับสู่ HICM Assessment Tool",
+    "welcomeSubtitle": "ปลอดภัย รวดเร็ว และรองรับทุกอุปกรณ์ ทั้งคอมพิวเตอร์ แท็บเล็ต และมือถือ",
+    "signIn": "เข้าสู่ระบบ",
+    "username": "ชื่อผู้ใช้",
+    "password": "รหัสผ่าน",
+    "forgotPassword": "ลืมรหัสผ่าน?",
+    "signInButton": "เข้าสู่ระบบ",
+    "language": "ภาษา"
+  },
+  "CompanyDashboard": {
+    "title": "บทนำ",
+    "content": "ข้อความ",
+    "startButton": "เริ่มทำแบบประเมิน"
+  }
+}

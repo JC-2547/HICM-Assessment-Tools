@@ -1,0 +1,21 @@
+{
+  "Navbar": {
+    "title": "HICM Assessment Tool",
+    "staffButton": "for staff"
+  },
+  "Home": {
+    "welcomeTitle": "Welcome to HICM Assessment Tool",
+    "welcomeSubtitle": "Secure, fast, and responsive access across desktop, tablet, and mobile.",
+    "signIn": "Sign In",
+    "username": "Username",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In",
+    "language": "Language"
+  },
+  "CompanyDashboard": {
+    "title": "Introduction",
+    "content": "text",
+    "startButton": "Start"
+  }
+}
