@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { getLocale } from "next-intl/server";
-import "./globals.css";
-import Navbar from "./component/navbar";
+
+import AuthGuard from "@/app/auth/auth-guard";
 import LanguageSwitcher from "@/app/component/languageSwitcher";
+import Navbar from "@/app/component/navbar";
+import AdminTabBar from "./admin-tab-bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,19 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Navbar />
+        <AdminTabBar locale={locale} />
+        <LanguageSwitcher />
+        <AuthGuard
+          redirectTo={`/${locale}`}
+          allowedRoles={["admin"]}
+          roleRedirects={{
+            audit: `/${locale}/auditdashboard`,
+            company: `/${locale}/companydashboard`,
+          }}
+        >
+          {children}
+        </AuthGuard>
       </body>
     </html>
   );
