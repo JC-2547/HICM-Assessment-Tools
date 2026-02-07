@@ -51,6 +51,7 @@ def seed_default_users() -> None:
 
 		seed_user("admin", "12345678", role_map["admin"])
 		seed_user("companytest", "12345678", role_map["company"])
+		seed_user("companytest2", "12345678", role_map["company"])
 		seed_user("audittest", "12345678", role_map["audit"])
 	finally:
 		db.close()

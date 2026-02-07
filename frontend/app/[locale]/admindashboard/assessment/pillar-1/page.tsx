@@ -16,7 +16,7 @@ export default function PillarOnePage() {
         >
           ← Back to pillars
         </Link>
-        <PillarBuilder pillarKey="pillar-1" defaultName="Pillar 1" />
+        <PillarBuilder pillarKey="pillar-1" defaultName="Health Promotion (H1)" />
       </div>
     </div>
   );

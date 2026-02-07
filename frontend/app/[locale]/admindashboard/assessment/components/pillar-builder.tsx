@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ADMIN_API_BASE } from "@/app/auth/api";
 
 type Question = {
   assessment_id?: number;
   title: string;
   detail: string;
-  choices: { label: string; score: number }[];
+  choices: { label: string; score: number; point_id?: number }[];
 };
 
 type PillarState = {
@@ -19,11 +20,16 @@ type PillarBuilderProps = {
   defaultName: string;
 };
 
+type PointOption = {
+  id: number;
+  score: number;
+};
+
 function getStorageKey(key: string) {
   return `hicm:pillar:${key}`;
 }
 
-const API_BASE = "http://127.0.0.1:8000/api/admin";
+const API_BASE = ADMIN_API_BASE;
 
 export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderProps) {
   const storageKey = useMemo(() => getStorageKey(pillarKey), [pillarKey]);
@@ -39,13 +45,26 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
     name: defaultName,
     questions: [],
   });
+  const [points, setPoints] = useState<PointOption[]>([]);
   const [newQuestion, setNewQuestion] = useState<Question>({
     assessment_id: undefined,
     title: "",
     detail: "",
-    choices: [{ label: "", score: 0 }],
+    choices: [{ label: "", score: 0, point_id: undefined }],
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const normalizeChoices = (choices: Question["choices"]) =>
+    choices.map((choice) => {
+      if (choice.point_id) {
+        return choice;
+      }
+      const match = points.find((point) => point.score === choice.score);
+      return {
+        ...choice,
+        point_id: match?.id,
+      };
+    });
 
   useEffect(() => {
     let cancelled = false;
@@ -53,15 +72,41 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
     const load = async () => {
       if (typeof window === "undefined") return;
       try {
-        const response = await fetch(`${API_BASE}/assessment-builder/${pillarKey}`, {
-          headers: authHeaders,
-        });
+        const [pillarResponse, pointsResponse] = await Promise.all([
+          fetch(
+            `${API_BASE}/assessment-builder/${pillarKey}?name=${encodeURIComponent(defaultName)}`,
+            {
+              headers: authHeaders,
+            }
+          ),
+          fetch(`${API_BASE}/points`, { headers: authHeaders }),
+        ]);
+        let pointsData: PointOption[] = [];
+        if (pointsResponse.ok) {
+          pointsData = (await pointsResponse.json()) as PointOption[];
+          if (!cancelled) {
+            setPoints(pointsData);
+          }
+        }
+        const response = pillarResponse;
         if (response.ok) {
           const data = (await response.json()) as PillarState;
+          const mappedQuestions = data.questions?.map((question) => ({
+            ...question,
+            choices: question.choices
+              ? question.choices.map((choice) => {
+                  if (choice.point_id) {
+                    return choice;
+                  }
+                  const match = pointsData.find((point) => point.score === choice.score);
+                  return { ...choice, point_id: match?.id };
+                })
+              : [],
+          }));
           if (!cancelled) {
             setPillar({
               name: data.name || defaultName,
-              questions: data.questions || [],
+              questions: mappedQuestions || [],
             });
           }
           return;
@@ -76,10 +121,15 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
           const parsed = JSON.parse(raw) as PillarState;
           const normalized: PillarState = {
             ...parsed,
+            name: parsed.name || defaultName,
             questions: parsed.questions.map((question) => ({
               ...question,
-              choices: question.choices.map((choice) =>
-                typeof choice === "string" ? { label: choice, score: 0 } : choice
+              choices: normalizeChoices(
+                question.choices.map((choice) =>
+                  typeof choice === "string"
+                    ? { label: choice, score: 0, point_id: undefined }
+                    : choice
+                )
               ),
             })),
           };
@@ -111,12 +161,19 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
 
   const fetchPillar = async () => {
     try {
-      const response = await fetch(`${API_BASE}/assessment-builder/${pillarKey}`, {
+      const response = await fetch(
+        `${API_BASE}/assessment-builder/${pillarKey}?name=${encodeURIComponent(defaultName)}`,
+        {
         headers: authHeaders,
-      });
+        }
+      );
       if (!response.ok) return;
       const data = (await response.json()) as PillarState;
-      setPillar({ name: data.name || defaultName, questions: data.questions || [] });
+      const mappedQuestions = data.questions?.map((question) => ({
+        ...question,
+        choices: normalizeChoices(question.choices || []),
+      }));
+      setPillar({ name: data.name || defaultName, questions: mappedQuestions || [] });
     } catch (error) {
       console.error(error);
     }
@@ -154,11 +211,19 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
     }));
   };
 
-  const updateNewChoiceScore = (index: number, value: number) => {
+  const updateNewChoicePoint = (index: number, value: string) => {
+    const pointId = value ? Number(value) : undefined;
+    const point = points.find((item) => item.id === pointId);
     setNewQuestion((prev) => ({
       ...prev,
       choices: prev.choices.map((choice, i) =>
-        i === index ? { ...choice, score: value } : choice
+        i === index
+          ? {
+              ...choice,
+              point_id: pointId,
+              score: point ? point.score : choice.score,
+            }
+          : choice
       ),
     }));
   };
@@ -166,7 +231,7 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
   const addNewChoice = () => {
     setNewQuestion((prev) => ({
       ...prev,
-      choices: [...prev.choices, { label: "", score: 0 }],
+      choices: [...prev.choices, { label: "", score: 0, point_id: undefined }],
     }));
   };
 
@@ -219,11 +284,27 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
       }
       setEditingIndex(null);
     }
-    setNewQuestion({ assessment_id: undefined, title: "", detail: "", choices: [{ label: "", score: 0 }] });
+    setNewQuestion({
+      assessment_id: undefined,
+      title: "",
+      detail: "",
+      choices: [{ label: "", score: 0, point_id: undefined }],
+    });
     await fetchPillar();
   };
 
-  const removeQuestion = (index: number) => {
+  const removeQuestion = async (index: number) => {
+    const target = pillar.questions[index];
+    if (target?.assessment_id) {
+      try {
+        await fetch(`${API_BASE}/assessment-builder/${pillarKey}/${target.assessment_id}`, {
+          method: "DELETE",
+          headers: authHeaders,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
     const next = {
       ...pillar,
       questions: pillar.questions.filter((_, i) => i !== index),
@@ -240,13 +321,18 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
       title: target.title,
       detail: target.detail,
       choices: target.choices.length
-        ? target.choices.map((choice) => ({ ...choice }))
-        : [{ label: "", score: 0 }],
+        ? normalizeChoices(target.choices.map((choice) => ({ ...choice })))
+        : [{ label: "", score: 0, point_id: undefined }],
     });
   };
 
   const resetForm = () => {
-    setNewQuestion({ assessment_id: undefined, title: "", detail: "", choices: [{ label: "", score: 0 }] });
+    setNewQuestion({
+      assessment_id: undefined,
+      title: "",
+      detail: "",
+      choices: [{ label: "", score: 0, point_id: undefined }],
+    });
     setEditingIndex(null);
   };
 
@@ -289,20 +375,25 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
         <div className="mt-4 space-y-3">
           <p className="text-sm font-semibold text-gray-700">Choices</p>
           {newQuestion.choices.map((choice, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_120px]">
+            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_200px]">
               <input
                 className="w-full rounded border border-gray-300 p-2 text-sm"
                 placeholder={`Choice ${index + 1}`}
                 value={choice.label}
                 onChange={(event) => updateNewChoice(index, event.target.value)}
               />
-              <input
+              <select
                 className="w-full rounded border border-gray-300 p-2 text-sm"
-                type="number"
-                min={0}
-                value={choice.score}
-                onChange={(event) => updateNewChoiceScore(index, Number(event.target.value))}
-              />
+                value={choice.point_id ?? ""}
+                onChange={(event) => updateNewChoicePoint(index, event.target.value)}
+              >
+                <option value="">Select point</option>
+                {points.map((point) => (
+                  <option key={point.id} value={point.id}>
+                    {point.score}
+                  </option>
+                ))}
+              </select>
             </div>
           ))}
           <button
@@ -317,7 +408,10 @@ export default function PillarBuilder({ pillarKey, defaultName }: PillarBuilderP
           <button
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
             onClick={addQuestion}
-            disabled={!newQuestion.title.trim()}
+            disabled={
+              !newQuestion.title.trim() ||
+              newQuestion.choices.some((choice) => !choice.point_id)
+            }
           >
             {editingIndex === null ? "Add question" : "Save changes"}
           </button>

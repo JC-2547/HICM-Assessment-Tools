@@ -12,8 +12,7 @@ class EvaluationCriteriaTable(Base):
     id = Column(Integer, primary_key=True, index=True)
     assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False)
     name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    weight = Column(Float, nullable=True)
+    point_id = Column(Integer, ForeignKey("points.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delete_at = Column(DateTime, nullable=True)
@@ -23,8 +22,7 @@ class EvaluationCriteria(BaseModel):
     id: int
     assessment_id: int
     name: str
-    description: str | None = None
-    weight: float | None = None
+    point_id: int | None = None
     created_at: datetime
     updated_at: datetime
     delete_at: datetime | None = None

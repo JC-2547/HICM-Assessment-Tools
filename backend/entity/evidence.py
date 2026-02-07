@@ -13,7 +13,6 @@ class EvidenceTable(Base):
     company_assessment_id = Column(
         Integer, ForeignKey("company_assessments.id"), nullable=False
     )
-    title = Column(String(255), nullable=False)
     url = Column(String(500), nullable=True)
     file_path = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -24,7 +23,6 @@ class EvidenceTable(Base):
 class Evidence(BaseModel):
     id: int
     company_assessment_id: int
-    title: str
     url: str | None = None
     file_path: str | None = None
     created_at: datetime

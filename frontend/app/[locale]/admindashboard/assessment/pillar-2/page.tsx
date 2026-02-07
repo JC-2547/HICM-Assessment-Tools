@@ -16,7 +16,7 @@ export default function PillarTwoPage() {
         >
           ← Back to pillars
         </Link>
-        <PillarBuilder pillarKey="pillar-2" defaultName="Pillar 2" />
+        <PillarBuilder pillarKey="pillar-2" defaultName="Industrial Safety & Environment (I2)" />
       </div>
     </div>
   );
