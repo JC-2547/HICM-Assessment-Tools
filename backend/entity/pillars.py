@@ -10,10 +10,9 @@ class PillarsTable(Base):
     __tablename__ = "pillars"
 
     id = Column(Integer, primary_key=True, index=True)
-    assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=True)
     key = Column(String(255), nullable=False)
     name = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
+    weight = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delete_at = Column(DateTime, nullable=True)
@@ -21,10 +20,9 @@ class PillarsTable(Base):
 
 class Pillars(BaseModel):
     id: int
-    assessment_id: int | None = None
     key: str
     name: str
-    description: str | None = None
+    weight: float | None = None
     created_at: datetime
     updated_at: datetime
     delete_at: datetime | None = None

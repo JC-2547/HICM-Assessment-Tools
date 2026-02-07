@@ -16,7 +16,7 @@ export default function PillarFourPage() {
         >
           ← Back to pillars
         </Link>
-        <PillarBuilder pillarKey="pillar-4" defaultName="Pillar 4" />
+        <PillarBuilder pillarKey="pillar-4" defaultName="Management & Sustainability (M4)" />
       </div>
     </div>
   );

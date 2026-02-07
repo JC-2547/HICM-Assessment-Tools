@@ -16,7 +16,7 @@ export default function PillarThreePage() {
         >
           ← Back to pillars
         </Link>
-        <PillarBuilder pillarKey="pillar-3" defaultName="Pillar 3" />
+        <PillarBuilder pillarKey="pillar-3" defaultName=" Community Engagement (C3)" />
       </div>
     </div>
   );

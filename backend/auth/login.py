@@ -7,7 +7,8 @@ from database.database import SessionLocal
 from entity.role import RoleTable
 from entity.user import UserTable
 
-router = APIRouter(prefix="/api", tags=["auth"])
+# router = APIRouter(prefix="/api", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 class LoginRequest(BaseModel):

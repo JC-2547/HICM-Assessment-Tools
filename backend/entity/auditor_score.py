@@ -14,8 +14,7 @@ class AuditorScoreTable(Base):
     company_assessment_id = Column(
         Integer, ForeignKey("company_assessments.id"), nullable=False
     )
-    point_id = Column(Integer, ForeignKey("points.id"), nullable=True)
-    score = Column(Float, nullable=True)
+    evaluation_criteria_id = Column(Integer, ForeignKey("evaluation_criteria.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     delete_at = Column(DateTime, nullable=True)
@@ -25,8 +24,7 @@ class AuditorScore(BaseModel):
     id: int
     auditor_id: int
     company_assessment_id: int
-    point_id: int | None = None
-    score: float | None = None
+    evaluation_criteria_id: int
     created_at: datetime
     updated_at: datetime
     delete_at: datetime | None = None

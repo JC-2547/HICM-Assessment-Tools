@@ -5,6 +5,7 @@ import LanguageSwitcher from "../component/languageSwitcher";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { apiUrl } from "../auth/api";
 
 export default function Home() {
   const t = useTranslations("Home");
@@ -19,7 +20,7 @@ export default function Home() {
     setIsLoading(true);
     setErrorMessage("");
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login", {
+      const response = await fetch(apiUrl("/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

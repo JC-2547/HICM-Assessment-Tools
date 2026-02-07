@@ -7,10 +7,10 @@ export default function AdminQuestionsPage() {
   const [activePillar, setActivePillar] = useState("pillar-1");
 
   const pillars = [
-    { key: "pillar-1", label: "Pillar 1" },
-    { key: "pillar-2", label: "Pillar 2" },
-    { key: "pillar-3", label: "Pillar 3" },
-    { key: "pillar-4", label: "Pillar 4" },
+    { key: "pillar-1", label: "Health Promotion (H1)" },
+    { key: "pillar-2", label: "Industrial Safety & Environment (I2)" },
+    { key: "pillar-3", label: "Community Engagement (C3)" },
+    { key: "pillar-4", label: "Management & Sustainability (M4)" },
   ];
 
   return (
@@ -39,7 +39,7 @@ export default function AdminQuestionsPage() {
 
         <PillarBuilder
           pillarKey={activePillar}
-          defaultName={pillars.find((pillar) => pillar.key === activePillar)?.label || "Pillar"}
+          defaultName={pillars.find((pillar) => pillar.key === activePillar)?.label || "Pillar555"}
         />
       </div>
     </div>

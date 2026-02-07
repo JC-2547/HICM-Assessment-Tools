@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { ADMIN_API_BASE } from "@/app/auth/api";
 
 type Role = {
 	id: number;
@@ -24,7 +25,7 @@ type FormState = {
 
 type ModalMode = "create" | "edit" | "delete" | null;
 
-const API_BASE = "http://127.0.0.1:8000/api/admin";
+const API_BASE = ADMIN_API_BASE;
 
 export default function AdminUserManagementPage() {
 	const locale = useLocale();

@@ -10,8 +10,6 @@ class PointTable(Base):
     __tablename__ = "points"
 
     id = Column(Integer, primary_key=True, index=True)
-    criteria_id = Column(Integer, ForeignKey("evaluation_criteria.id"), nullable=False)
-    label = Column(String(255), nullable=False)
     score = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
@@ -20,8 +18,6 @@ class PointTable(Base):
 
 class Point(BaseModel):
     id: int
-    criteria_id: int
-    label: str
     score: float
     created_at: datetime
     updated_at: datetime

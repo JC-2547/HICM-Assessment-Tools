@@ -13,6 +13,9 @@ from entity.point import PointTable
 from entity.role import RoleTable
 from entity.status import StatusTable
 from entity.user import UserTable
+from entity.company_submit import CompanySubmitTable
+from entity.company_assessment_result import CompanyAssessmentResultTable
+from entity.auditor_submit import AuditorSubmitTable
 
 
 def migrate() -> None:
@@ -22,7 +25,21 @@ def migrate() -> None:
 			text("ALTER TABLE pillars ADD COLUMN IF NOT EXISTS key VARCHAR(255)")
 		)
 		connection.execute(
-			text("ALTER TABLE pillars ALTER COLUMN assessment_id DROP NOT NULL")
+			text(
+				"""
+				DO $$
+				BEGIN
+				    IF EXISTS (
+				        SELECT 1
+				        FROM information_schema.columns
+				        WHERE table_name = 'pillars'
+				          AND column_name = 'assessment_id'
+				    ) THEN
+				        ALTER TABLE pillars ALTER COLUMN assessment_id DROP NOT NULL;
+				    END IF;
+				END $$;
+				"""
+			)
 		)
 		connection.execute(
 			text("ALTER TABLE assessments ADD COLUMN IF NOT EXISTS pillar_id INTEGER")
@@ -33,10 +50,36 @@ def migrate() -> None:
 			)
 		)
 		connection.execute(
-			text("ALTER TABLE evaluation_criteria ALTER COLUMN pillar_id DROP NOT NULL")
+			text(
+				"ALTER TABLE evaluation_criteria ADD COLUMN IF NOT EXISTS point_id INTEGER"
+			)
 		)
 		connection.execute(
-			text("ALTER TABLE points ADD COLUMN IF NOT EXISTS label VARCHAR(255)")
+			text(
+				"""
+				DO $$
+				BEGIN
+				    IF EXISTS (
+				        SELECT 1
+				        FROM information_schema.columns
+				        WHERE table_name = 'evaluation_criteria'
+				          AND column_name = 'pillar_id'
+				    ) THEN
+				        ALTER TABLE evaluation_criteria ALTER COLUMN pillar_id DROP NOT NULL;
+				    END IF;
+				END $$;
+				"""
+			)
+		)
+		connection.execute(
+			text(
+				"ALTER TABLE evidences ADD COLUMN IF NOT EXISTS company_assessment_id INTEGER"
+			)
+		)
+		connection.execute(
+			text(
+				"ALTER TABLE company_submits ADD COLUMN IF NOT EXISTS status_id INTEGER"
+			)
 		)
 
 
