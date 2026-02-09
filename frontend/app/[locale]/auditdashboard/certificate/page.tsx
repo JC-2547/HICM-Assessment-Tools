@@ -38,49 +38,9 @@ const observerRows = [
 export default function CertificatePage() {
     const contentRef = useRef<HTMLDivElement | null>(null);
 
-    const handleExportPdf = useCallback(async () => {
-        if (!contentRef.current || typeof window === "undefined") return;
-
-        try {
-            const html2canvas = (await import("html2canvas")).default;
-            const { jsPDF } = await import("jspdf");
-
-            const canvas = await html2canvas(contentRef.current, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-            });
-
-            const imgData = canvas.toDataURL("image/jpeg", 0.98);
-            const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = pageWidth - 20;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const yOffset = Math.max(10, (pageHeight - imgHeight) / 2);
-
-            pdf.addImage(imgData, "JPEG", 10, yOffset, imgWidth, imgHeight);
-            pdf.save("hicm-certificate.pdf");
-        } catch (error) {
-            console.error("PDF export failed", error);
-            alert("ไม่สามารถสร้างไฟล์ PDF ได้ กรุณาลองใหม่อีกครั้ง");
-        }
-    }, []);
-
     return (
         <div className="min-h-[calc(100vh-56px)] bg-gray-100 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
             <div className="certificate-print mx-auto w-full max-w-5xl space-y-4">
-                <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
-                    <button
-                        type="button"
-                        onClick={handleExportPdf}
-                        className="rounded bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
-                    >
-                        Export PDF
-                    </button>
-                </div>
-
                 <div ref={contentRef} className="rounded-xl border border-gray-200 bg-white p-6">
                     <div className="rounded-lg">
                     <div className="border-b border-gray-300 bg-gray-50 px-6 py-5 text-center">
